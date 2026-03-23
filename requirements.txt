@@ -1,0 +1,6 @@
+python-telegram-bot==21.6
+google-apps-meet==0.1.9
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
+googleapis-common-protos==1.65.0
+python-dotenv==1.0.1
