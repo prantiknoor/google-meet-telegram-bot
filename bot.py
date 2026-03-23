@@ -17,6 +17,7 @@ from telegram.ext import (
 from dotenv import load_dotenv
 
 from meet_service import create_meet_space
+from health_server import start_health_server
 from whitelist import (
     is_whitelisted,
     add_to_whitelist,
@@ -287,6 +288,7 @@ def main():
         raise ValueError("TELEGRAM_BOT_TOKEN is not set in .env")
 
     load_whitelist()  # Pre-load whitelist from disk
+    start_health_server()
 
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
