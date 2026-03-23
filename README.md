@@ -68,13 +68,21 @@ DEFAULT_WHITELIST_IDS=123456789
 
 > **Tip:** Find your Telegram user ID by messaging [@userinfobot](https://t.me/userinfobot)
 
-### 5. First run — authorize Google
+### 5. Generate token once (separate step)
+
+```bash
+python create_token.py
+```
+
+This opens a browser for OAuth and saves `token.json`.
+
+### 6. Run bot
 
 ```bash
 python bot.py
 ```
 
-On the very first run, a browser window will open asking you to authorize the bot with your Google account. After approval, a `token.json` file is saved — you won't need to authorize again.
+Runtime reads `token.json` and does not write token files, which is suitable for read-only production filesystems.
 
 ---
 
@@ -132,6 +140,7 @@ Bot: 📋 Whitelisted users (2):
 meet_bot/
 ├── bot.py            # Telegram bot handlers
 ├── meet_service.py   # Google Meet API integration
+├── create_token.py   # One-time OAuth token generator
 ├── whitelist.py      # Whitelist management with persistence
 ├── requirements.txt
 ├── .env.example      # Environment variable template
@@ -164,4 +173,4 @@ meet_bot/
 | `TELEGRAM_BOT_TOKEN is not set` | Check your `.env` file |
 | `credentials.json not found` | Download from Google Cloud Console |
 | `PERMISSION_DENIED` from Meet API | Ensure Meet API is enabled in your GCP project |
-| Token expired | Delete `token.json` and restart the bot to re-authenticate |
+| `token.json` missing/invalid | Run `python create_token.py` and redeploy |

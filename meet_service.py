@@ -23,30 +23,42 @@ TOKEN_FILE = os.getenv("GOOGLE_TOKEN_FILE", "token.json")
 
 
 def _get_credentials() -> Credentials:
-    """Load or refresh OAuth2 credentials, running the auth flow if needed."""
+    """Load OAuth2 credentials for runtime use without writing token files."""
     creds = None
 
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    else:
+        raise FileNotFoundError(
+            f"Google token file not found: '{TOKEN_FILE}'. "
+            "Generate it first with: python create_token.py"
+        )
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            logger.info("Refreshed Google OAuth token.")
+            logger.info("Refreshed Google OAuth token in-memory.")
         else:
-            if not os.path.exists(CREDENTIALS_FILE):
-                raise FileNotFoundError(
-                    f"Google credentials file not found: '{CREDENTIALS_FILE}'. "
-                    "Download it from Google Cloud Console and place it next to bot.py."
-                )
-            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
-            creds = flow.run_local_server(port=0)
-            logger.info("New Google OAuth token obtained via browser flow.")
-
-        with open(TOKEN_FILE, "w") as fh:
-            fh.write(creds.to_json())
+            raise RuntimeError(
+                "Google token is invalid and cannot be refreshed in runtime mode. "
+                "Regenerate token with: python create_token.py"
+            )
 
     return creds
+
+
+def create_token_payload() -> str:
+    """Run interactive OAuth flow and return token JSON payload."""
+    if not os.path.exists(CREDENTIALS_FILE):
+        raise FileNotFoundError(
+            f"Google credentials file not found: '{CREDENTIALS_FILE}'. "
+            "Download it from Google Cloud Console and place it in the project directory."
+        )
+
+    flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+    creds = flow.run_local_server(port=0)
+    logger.info("Generated Google OAuth token payload.")
+    return creds.to_json()
 
 
 def create_meet_space() -> dict:
